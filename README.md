@@ -1,70 +1,48 @@
-# Getting Started with Create React App
+# AI Url to Image
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Introduction
 
-## Available Scripts
+With this small node server you can create any image from your browser.
 
-In the project directory, you can run:
+## Usage
 
-### `npm start`
+### Setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+This tool runs with [Node.js](https://nodejs.org/en/). Clone this repo and setup with:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```
+npm install
+node index
+```
 
-### `npm test`
+### Start
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+#### Query parameters
 
-### `npm run build`
+The server runs locally at `http://localhost:3000`. The following query parameters can be used:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| query     | values      | default  | description                                                                                                                                                   |
+| --------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| prompt    | `string`    | `""`     | The description of the image to generate                                                                                                                      |
+| w         | `128-1024`  | `512`    | The width of the image.                                                                                                                                       |
+| h         | `128-1024`  | `512`    | The height of the image.                                                                                                                                      |
+| quality   | `1-500`     | `20`     | The number of inference steps. The higher the number the better the quality. Also, the slower the generation process                                          |
+| precision | `1-20`      | `10`     | The guidance scale. The higher the number, the more accurate the AI follows the prompt.                                                                       |
+| seed      | `0-1000000` | `random` | A generation seed number. By default a random number will be chosen. number.                                                                                  |
+| force     | `boolean`   | `false`  | Normally all generated images will be cached, so with the same query the image will not be regenerated. This will force regenerate the image from the server. |
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#### Examples
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Append the following query strings behind the domain (e.g. `http://localhost:3000`)
 
-### `npm run eject`
+`?prompt=red long haired maine coon cat&precision=10`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+`?prompt=portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k`
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+`?prompt=Fantasy house tree in the woods with animals and full of life&w=1024&h=768&quality=200`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+`?prompt=army defending stone bridge of a castle from a large attacking force, digital art, 4 k, epic, intense, medieval, intricate, battle, armies clashing, medieval warfare, castle, greg rutkowski, joeri lefevre, max prodanov, trending on artstation&w=512&h=1024&quality=50&precision=7&seed=8482955`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Disclaimer
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+All credits should go to [PromptHero](https://prompthero.com/) and [Replicate](https://replicate.com/prompthero/openjourney), as this mainly uses their API to generate the images. Don't be disappointed when you suddenly get a 403 error as a response, as this means you may have exceeded your number of free requests to the Replicate server on your IP address.
