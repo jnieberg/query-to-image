@@ -3,7 +3,7 @@ import axios from "axios";
 import fs from "fs";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const endpoint =
   "https://replicate.com/api/models/prompthero/openjourney/versions/9936c2001faa2194a261c01381f90e65261879985476014a0a37a334593a05eb/predictions";
 const outputFolder = "images";
