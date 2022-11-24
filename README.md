@@ -12,18 +12,16 @@ This tool runs with [Node.js](https://nodejs.org/en/). Clone this repo and setup
 
 ```
 npm install
-node index
+npm start
 ```
 
-### Start
+### Query
 
-#### Query parameters
-
-The server runs locally at `http://localhost:3000`. The following query parameters can be used:
+The server runs locally at `http://localhost:9000/.netlify/functions/image`. The following query parameters can be used:
 
 | query     | values      | default  | description                                                                                                                                                   |
 | --------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| prompt    | `string`    | `""`     | The description of the image to generate                                                                                                                      |
+| prompt \* | `string`    |          | The description of the image to generate                                                                                                                      |
 | w         | `128-1024`  | `512`    | The width of the image.                                                                                                                                       |
 | h         | `128-1024`  | `512`    | The height of the image.                                                                                                                                      |
 | quality   | `1-500`     | `20`     | The number of inference steps. The higher the number the better the quality. Also, the slower the generation process                                          |
@@ -31,9 +29,11 @@ The server runs locally at `http://localhost:3000`. The following query paramete
 | seed      | `0-1000000` | `random` | A generation seed number. By default a random number will be chosen. number.                                                                                  |
 | force     | `boolean`   | `false`  | Normally all generated images will be cached, so with the same query the image will not be regenerated. This will force regenerate the image from the server. |
 
-#### Examples
+_\* mandatory_
 
-Append the following query strings behind the domain (e.g. `http://localhost:3000`)
+### Examples
+
+Append the following query strings behind the url (e.g. `http://localhost:9000/.netlify/functions/image`)
 
 `?prompt=red long haired maine coon cat&precision=10`
 

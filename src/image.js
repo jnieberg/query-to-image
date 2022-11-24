@@ -1,9 +1,10 @@
 import express from "express";
+import serverless from "serverless-http";
 import axios from "axios";
 import fs from "fs";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const router = express.Router();
 const endpoint =
   "https://replicate.com/api/models/prompthero/openjourney/versions/9936c2001faa2194a261c01381f90e65261879985476014a0a37a334593a05eb/predictions";
 const outputFolder = "images";
@@ -54,7 +55,8 @@ const imageRequest = async (/** @type {string} */ uuid) => {
   return output;
 };
 
-app.get("/", (req, res) => {
+app.use("/.netlify/functions/image", router);
+router.get("/", (req, res) => {
   const {
     query: { prompt, quality = 20, precision = 10, w = 512, h = 512, seed = Math.floor(Math.random() * 1000000) },
   } = req;
@@ -75,7 +77,9 @@ app.get("/", (req, res) => {
   console.clear();
   console.log(req.query);
 
-  if (force || !fs.existsSync(filePath)) {
+  if (!prompt) {
+    res.end("To create an image, append to your url: ?prompt=[description of the image]");
+  } else if (force || !fs.existsSync(filePath)) {
     axios({
       method: "post",
       url: endpoint,
@@ -107,12 +111,13 @@ app.get("/", (req, res) => {
           }).then((resImage) => {
             const writer = fs.createWriteStream(filePath);
             resImage.data.pipe(writer);
+            res.writeHead(200, { "Content-Type": "image/png" });
             resImage.data.pipe(res);
           });
         });
       })
       .catch(function (error) {
-        res.status(500).json(error);
+        res.end(error.message);
       });
   } else {
     const data = fs.readFileSync(filePath);
@@ -121,6 +126,8 @@ app.get("/", (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Query- to-Image AI generator listening on port ${port}`);
+router.get("/test", (req, res) => {
+  res.end("Testing is OK");
 });
+
+exports.handler = serverless(app);
