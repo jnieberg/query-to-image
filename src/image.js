@@ -7,7 +7,7 @@ const app = express();
 const router = express.Router();
 const endpoint =
   "https://replicate.com/api/models/prompthero/openjourney/versions/9936c2001faa2194a261c01381f90e65261879985476014a0a37a334593a05eb/predictions";
-const outputFolder = "images";
+const outputFolder = "/images";
 
 const imageProgressRequest = (/** @type {string} */ uuid) => {
   return new Promise((resolve, reject) => {
@@ -73,13 +73,17 @@ router.get("/", (req, res) => {
     .map(([k, v]) => `${k}-${`${v}`.replace(/\W+/g, "+")}`)
     .join("|");
   const filePath = `${outputFolder}/${fileName}.png`;
+  let fileExists = false;
+  try {
+    fileExists = !fs.existsSync(filePath);
+  } catch (error) {}
 
   console.clear();
   console.log(req.query);
 
   if (!prompt) {
     res.end("To create an image, append to your url: ?prompt=[description of the image]");
-  } else if (force || !fs.existsSync(filePath)) {
+  } else if (force || !fileExists) {
     axios({
       method: "post",
       url: endpoint,
