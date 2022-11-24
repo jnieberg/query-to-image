@@ -7,7 +7,7 @@ const app = express();
 const router = express.Router();
 const endpoint =
   "https://replicate.com/api/models/prompthero/openjourney/versions/9936c2001faa2194a261c01381f90e65261879985476014a0a37a334593a05eb/predictions";
-const outputFolder = "/images";
+const outputFolder = "images";
 
 const imageProgressRequest = (/** @type {string} */ uuid) => {
   return new Promise((resolve, reject) => {
@@ -118,12 +118,16 @@ router.get("/", (req, res) => {
         });
       })
       .catch(function (error) {
-        res.end(error.message);
+        res.status(500).end(error.message);
       });
   } else {
-    const data = fs.readFileSync(filePath);
-    res.writeHead(200, { "Content-Type": "image/png" });
-    res.end(data);
+    try {
+      const data = fs.readFileSync(filePath);
+      res.writeHead(200, { "Content-Type": "image/png" });
+      res.end(data);
+    } catch (error) {
+      res.end("error");
+    }
   }
 });
 
