@@ -135,6 +135,18 @@ app.get("/test", (req, res) => {
   res.end("Testing is OK");
 });
 
+app.use("/images", express.static("images"));
+app.get("/images", (req, res) => {
+  fs.readdir(outputFolder, (err, files) => {
+    res.send(
+      files
+        .filter((file) => file.indexOf(".png") > 0)
+        .map((file) => `<img src="/${outputFolder}/${file}"/>`)
+        .join("")
+    );
+  });
+});
+
 app.listen(port, () => {
   console.log(`Now listening to port ${port}`);
 });
