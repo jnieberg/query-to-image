@@ -73,10 +73,7 @@ router.get("/", (req, res) => {
     .map(([k, v]) => `${k}-${`${v}`.replace(/\W+/g, "+")}`)
     .join("|");
   const filePath = `${outputFolder}/${fileName}.png`;
-  let fileExists = false;
-  try {
-    fileExists = !fs.existsSync(filePath);
-  } catch (error) {}
+  const fileExists = fs.existsSync(filePath);
 
   console.clear();
   console.log(req.query);
