@@ -2,4 +2,5 @@ index-private.js
 
 node_modules
 functions
-images/prompt-**
+/images
+dist/images/prompt-**
