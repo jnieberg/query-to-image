@@ -59,11 +59,6 @@ app.get("/", (req, res) => {
     query: { prompt, quality = 20, precision = 10, w = 512, h = 512, seed = Math.floor(Math.random() * 1000000) },
   } = req;
 
-  if (typeof req.query.seed === "undefined") {
-    res.redirect(`${req.url}&seed=${seed}`);
-    return;
-  }
-
   const force = typeof req.query.force === "undefined" || req.query.force === "false" ? false : true;
   const inputs = {
     prompt: `mdjrny-v4 style ${prompt}`,
@@ -79,64 +74,82 @@ app.get("/", (req, res) => {
   const filePath = `${outputFolder}/${fileName}.png`;
   const fileExists = fs.existsSync(filePath);
 
-  console.clear();
-  console.log(req.query);
-
   res.header("Access-Control-Allow-Origin", "*");
   res.header("vary", "Accept-Encoding");
 
-  if (!prompt) {
-    res.end("To create an image, append to your url: ?prompt=description of the image");
-  } else if (force || !fileExists) {
-    axios({
-      method: "post",
-      url: endpoint,
-      responseType: "stream",
-      data: {
-        inputs: {
-          ...inputs,
-          num_outputs: 1,
-        },
-      },
-    })
-      .then((resImageUrl) => {
-        let image = null;
-        let data = "";
-        resImageUrl.data.on("data", (/** @type {string} */ chunk) => {
-          data += chunk;
-        });
-        resImageUrl.data.on("end", async () => {
-          const { uuid } = JSON.parse(data);
-          try {
-            image = await imageRequest(uuid);
-          } catch (error) {
-            res.status(400).send(error.message);
-          }
-          axios({
-            method: "get",
-            url: image,
-            responseType: "stream",
-          }).then((resImage) => {
-            try {
-              const writer = fs.createWriteStream(filePath);
-              resImage.data.pipe(writer);
-            } catch (error) {}
-            res.writeHead(200, { "Content-Type": "image/png" });
-            resImage.data.pipe(res);
-          });
-        });
-      })
-      .catch(function (error) {
-        res.status(500).end(error.message);
-      });
-  } else {
-    try {
-      const data = fs.readFileSync(filePath);
-      res.writeHead(200, { "Content-Type": "image/png" });
-      res.end(data);
-    } catch (error) {
-      res.end("error");
+  if (prompt) {
+    if (typeof req.query.seed === "undefined") {
+      res.redirect(`${req.url}&seed=${seed}`);
+      return;
     }
+    console.clear();
+    console.log(inputs);
+
+    if (force || !fileExists) {
+      axios({
+        method: "post",
+        url: endpoint,
+        responseType: "stream",
+        data: {
+          inputs: {
+            ...inputs,
+            num_outputs: 1,
+          },
+        },
+      })
+        .then((resImageUrl) => {
+          let image = null;
+          let data = "";
+          resImageUrl.data.on("data", (/** @type {string} */ chunk) => {
+            data += chunk;
+          });
+          resImageUrl.data.on("end", async () => {
+            const { uuid } = JSON.parse(data);
+            try {
+              image = await imageRequest(uuid);
+            } catch (error) {
+              res.status(400).send(error.message);
+            }
+            axios({
+              method: "get",
+              url: image,
+              responseType: "stream",
+            }).then((resImage) => {
+              try {
+                const writer = fs.createWriteStream(filePath);
+                resImage.data.pipe(writer);
+              } catch (error) {}
+              res.writeHead(200, { "Content-Type": "image/png" });
+              resImage.data.pipe(res);
+            });
+          });
+        })
+        .catch(function (error) {
+          res.status(500).end(error.message);
+        });
+    } else {
+      try {
+        const data = fs.readFileSync(filePath);
+        res.writeHead(200, { "Content-Type": "image/png" });
+        res.end(data);
+      } catch (error) {
+        res.end("error");
+      }
+    }
+  } else {
+    res.send(`To create an image, append and of the following parameters to your url:<br/>
+    <code><pre>
+| query     | values    | default | description                                                                                                                                                   |
+| --------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| prompt*   | string    |         | The description of the image to generate                                                                                                                      |
+| w         | 128-1024  | 512     | The width of the image.                                                                                                                                       |
+| h         | 128-1024  | 512     | The height of the image.                                                                                                                                      |
+| quality   | 1-500     | 20      | The number of inference steps. The higher the number the better the quality. Also, the slower the generation process                                          |
+| precision | 1-20      | 10      | The guidance scale. The higher the number, the more accurate the AI follows the prompt.                                                                       |
+| seed      | 0-1000000 | random  | A generation seed number. By default a random number will be chosen. number.                                                                                  |
+| force     | boolean   | false   | Normally all generated images will be cached, so with the same query the image will not be regenerated. This will force regenerate the image from the server. |
+    
+    </pre></code>`);
   }
 });
 
