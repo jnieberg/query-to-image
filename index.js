@@ -58,6 +58,12 @@ app.get("/", (req, res) => {
   const {
     query: { prompt, quality = 20, precision = 10, w = 512, h = 512, seed = Math.floor(Math.random() * 1000000) },
   } = req;
+
+  if (typeof req.query.seed === "undefined") {
+    res.redirect(`${req.url}&seed=${seed}`);
+    return;
+  }
+
   const force = typeof req.query.force === "undefined" || req.query.force === "false" ? false : true;
   const inputs = {
     prompt: `mdjrny-v4 style ${prompt}`,
@@ -80,7 +86,7 @@ app.get("/", (req, res) => {
   res.header("vary", "Accept-Encoding");
 
   if (!prompt) {
-    res.end("To create an image, append to your url: ?prompt=[description of the image]");
+    res.end("To create an image, append to your url: ?prompt=description of the image");
   } else if (force || !fileExists) {
     axios({
       method: "post",
