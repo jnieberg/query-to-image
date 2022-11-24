@@ -76,6 +76,9 @@ app.get("/", (req, res) => {
   console.clear();
   console.log(req.query);
 
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("vary", "Accept-Encoding");
+
   if (!prompt) {
     res.end("To create an image, append to your url: ?prompt=[description of the image]");
   } else if (force || !fileExists) {
