@@ -137,9 +137,9 @@ app.get("/", (req, res) => {
       }
     }
   } else {
-    res.send(`To create an image, append and of the following parameters to your url:<br/>
+    res.send(`To create an image, append the following parameters to your url:<br/>
     <code><pre>
-| query     | values    | default | description                                                                                                                                                   |
+| parameter | values    | default | description                                                                                                                                                   |
 | --------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | prompt*   | string    |         | The description of the image to generate                                                                                                                      |
 | w         | 128-1024  | 512     | The width of the image.                                                                                                                                       |
