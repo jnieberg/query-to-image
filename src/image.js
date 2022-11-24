@@ -110,8 +110,10 @@ router.get("/", (req, res) => {
             url: image,
             responseType: "stream",
           }).then((resImage) => {
-            const writer = fs.createWriteStream(filePath);
-            resImage.data.pipe(writer);
+            try {
+              const writer = fs.createWriteStream(filePath);
+              resImage.data.pipe(writer);
+            } catch (error) {}
             res.writeHead(200, { "Content-Type": "image/png" });
             resImage.data.pipe(res);
           });
