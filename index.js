@@ -1,10 +1,9 @@
 import express from "express";
-import serverless from "serverless-http";
 import axios from "axios";
 import fs from "fs";
 
 const app = express();
-const router = express.Router();
+const port = process.env.PORT || 5000;
 const endpoint =
   "https://replicate.com/api/models/prompthero/openjourney/versions/9936c2001faa2194a261c01381f90e65261879985476014a0a37a334593a05eb/predictions";
 const outputFolder = "images";
@@ -55,8 +54,7 @@ const imageRequest = async (/** @type {string} */ uuid) => {
   return output;
 };
 
-app.use("/.netlify/functions/image", router);
-router.get("/", (req, res) => {
+app.get("/", (req, res) => {
   const {
     query: { prompt, quality = 20, precision = 10, w = 512, h = 512, seed = Math.floor(Math.random() * 1000000) },
   } = req;
@@ -133,8 +131,10 @@ router.get("/", (req, res) => {
   }
 });
 
-router.get("/test", (req, res) => {
+app.get("/test", (req, res) => {
   res.end("Testing is OK");
 });
 
-exports.handler = serverless(app);
+app.listen(port, () => {
+  console.log(`Now listening to port ${port}`);
+});

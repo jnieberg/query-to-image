@@ -17,7 +17,7 @@ npm start
 
 ### Query
 
-The server runs locally at `http://localhost:9000/.netlify/functions/image`. The following query parameters can be used:
+The server runs locally at `http://localhost:9000`. The following query parameters can be used:
 
 | query     | values      | default  | description                                                                                                                                                   |
 | --------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -33,7 +33,7 @@ _\* mandatory_
 
 ### Examples
 
-Append the following query strings behind the url (e.g. `http://localhost:9000/.netlify/functions/image`)
+Append the following query strings behind the url (e.g. `http://localhost:9000`)
 
 `?prompt=red long haired maine coon cat&precision=10`
 
