@@ -19,15 +19,15 @@ npm start
 
 The server runs locally at `http://localhost:9000`. The following query parameters can be used:
 
-| query     | values      | default  | description                                                                                                                                                   |
-| --------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| prompt \* | `string`    |          | The description of the image to generate                                                                                                                      |
-| w         | `128-1024`  | `512`    | The width of the image.                                                                                                                                       |
-| h         | `128-1024`  | `512`    | The height of the image.                                                                                                                                      |
-| quality   | `1-500`     | `20`     | The number of inference steps. The higher the number the better the quality. Also, the slower the generation process                                          |
-| precision | `1-20`      | `10`     | The guidance scale. The higher the number, the more accurate the AI follows the prompt.                                                                       |
-| seed      | `0-1000000` | `random` | A generation seed number. By default a random number will be chosen. number.                                                                                  |
-| force     | `boolean`   | `false`  | Normally all generated images will be cached, so with the same query the image will not be regenerated. This will force regenerate the image from the server. |
+| query     | values      | default | description                                                                                                                                                   |
+| --------- | ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| prompt \* | `string`    |         | The description of the image to generate                                                                                                                      |
+| seed      | `1-1000000` | `1`     | A generation seed number. Change this to vary the image.                                                                                                      |
+| w         | `128-1024`  | `512`   | The width of the image.                                                                                                                                       |
+| h         | `128-1024`  | `512`   | The height of the image.                                                                                                                                      |
+| quality   | `1-500`     | `20`    | The number of inference steps. The higher the number the better the quality. Also, the slower the generation process                                          |
+| precision | `1-20`      | `10`    | The guidance scale. The higher the number, the more accurate the AI follows the prompt.                                                                       |
+| force     | `boolean`   | `false` | Normally all generated images will be cached, so with the same query the image will not be regenerated. This will force regenerate the image from the server. |
 
 _\* mandatory_
 

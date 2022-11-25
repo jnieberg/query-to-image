@@ -56,7 +56,7 @@ const imageRequest = async (/** @type {string} */ uuid) => {
 
 app.get("/", (req, res) => {
   const {
-    query: { prompt, quality = 20, precision = 10, w = 512, h = 512, seed = Math.floor(Math.random() * 1000000) },
+    query: { prompt, quality = 20, precision = 10, w = 512, h = 512, seed = 1 }, // Math.floor(Math.random() * 1000000)
   } = req;
 
   const force = typeof req.query.force === "undefined" || req.query.force === "false" ? false : true;
