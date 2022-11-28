@@ -113,7 +113,7 @@
         <article>
           <fieldset>
             <label for="prompt">Prompt:</label>
-            <input type="text" name="prompt" id="prompt" />
+            <input type="text" name="prompt" id="prompt" required />
           </fieldset>
           <fieldset class="half">
             <label for="w">Width:</label>
@@ -177,21 +177,20 @@
       <div>1-1000000</div>
       <div>1</div>
       <div>A generation seed number. Change this to vary the image.</div>
-
-      <div>force</div>
-      <div>boolean</div>
-      <div>false</div>
-      <div>Force reloading the image from the server.</div>
     </div>
     <script>
-      var myForm = document.getElementById("form");
-      myForm.addEventListener("submit", function () {
-        var allInputs = myForm.getElementsByTagName("input");
-        for (var i = 0; i < allInputs.length; i++) {
-          var input = allInputs[i];
-          if (input.name && !input.value) {
-            input.name = "";
-          }
+      window.addEventListener("load", function () {
+        const seed = document.querySelector("#seed");
+        seed.value = Math.floor(Math.random() * 1000000);
+
+        const forms = document.querySelectorAll("form");
+        for (let form of forms) {
+          form.addEventListener("formdata", function (event) {
+            let formData = event.formData;
+            for (let [name, value] of Array.from(formData.entries())) {
+              if (value === "") formData.delete(name);
+            }
+          });
         }
       });
     </script>
