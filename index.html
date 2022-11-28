@@ -15,6 +15,10 @@
         margin: 0 0.5rem;
       }
 
+      body {
+        margin: 0;
+      }
+
       /* page */
       .page > * {
         position: relative;
@@ -28,7 +32,11 @@
         padding: 1em;
       }
       .page article > * {
+        grid-column-end: span 2;
         margin: 0;
+      }
+      .page article > .half {
+        grid-column-end: span 1;
       }
       .page > *::after {
         position: absolute;
@@ -38,17 +46,23 @@
       }
 
       fieldset {
-        grid-column-end: span 2;
+        display: flex;
+        gap: 0.5em;
+        flex-wrap: nowrap;
+        align-items: center;
         border: none;
         padding: 0;
       }
 
-      fieldset.half {
-        grid-column-end: span 1;
+      @media screen and (max-width: 768px) {
+        .page article > .half {
+          grid-column-end: span 2;
+        }
       }
 
       label {
         display: block;
+        min-width: 5em;
       }
 
       input[type="text"],
@@ -62,30 +76,36 @@
         box-sizing: border-box;
       }
 
-      input:hover,
-      button:hover {
-        outline-width: 1px;
-        outline-color: #008844;
-        outline-offset: 0;
-        outline-style: solid;
+      input:hover::after,
+      button:hover::after {
+        content: "";
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.15);
+        inset: 0;
       }
 
       input:focus,
       button:focus {
         outline-width: 2px;
-        outline-color: #008844;
-        outline-offset: 0;
+        outline-color: #aaaaaa;
+        outline-offset: 1px;
         outline-style: solid;
       }
 
       button {
+        position: relative;
         color: #ffffff;
-        background-color: #008844;
+        background-color: #666666;
         font-size: 1em;
         padding: 0.5em;
         border: 0;
         border-radius: 0.2em;
         cursor: pointer;
+      }
+
+      button.primary {
+        position: relative;
+        background-color: #008844;
       }
 
       .table {
@@ -134,9 +154,10 @@
           <fieldset>
             <label for="seed">Seed:</label>
             <input type="number" name="seed" id="seed" placeholder="1" min="1" max="999999" />
+            <button id="randomizeSeed">Random</button>
           </fieldset>
           <div>
-            <button>Submit</button>
+            <button class="primary">Generate image</button>
           </div>
         </article>
       </div>
@@ -178,14 +199,24 @@
       <div>1</div>
       <div>A generation seed number. Change this to vary the image.</div>
     </div>
+
     <script>
-      window.addEventListener("load", function () {
+      const randomizeSeed = () => {
         const seed = document.querySelector("#seed");
         seed.value = Math.floor(Math.random() * 1000000);
+      };
+
+      document.querySelector("#randomizeSeed").addEventListener("click", (event) => {
+        event.preventDefault();
+        randomizeSeed();
+      });
+
+      window.addEventListener("load", function () {
+        randomizeSeed();
 
         const forms = document.querySelectorAll("form");
         for (let form of forms) {
-          form.addEventListener("formdata", function (event) {
+          form.addEventListener("formdata", (event) => {
             let formData = event.formData;
             for (let [name, value] of Array.from(formData.entries())) {
               if (value === "") formData.delete(name);
