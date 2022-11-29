@@ -49,7 +49,7 @@ const imageList = (/** @type {string[]} */ files) => `<html lang="en">
       display: grid;
       gap: 1em;
       grid-template-columns: 1fr 1fr 1fr 1fr;
-      grid-auto-rows: 30em;
+      /*grid-auto-rows: 30em;*/
       justify-content: center;
       align-items: center;
     }
@@ -192,6 +192,20 @@ const imageRequest = async (/** @type {string} */ uuid) => {
   return output;
 };
 
+const writeImage = (
+  /** @type {import("express-serve-static-core").Response<any, Record<string, any>, number>} */ res,
+  /** @type {import("axios").AxiosResponse<any, any>} */ resImage,
+  /** @type {fs.PathLike} */ filePath
+) => {
+  console.log(resImage.data);
+  try {
+    const writer = fs.createWriteStream(filePath);
+    resImage.data.pipe(writer);
+  } catch (error) {}
+  res.writeHead(200, { "Content-Type": "image/png" });
+  resImage.data.pipe(res);
+};
+
 app.get("/", (req, res) => {
   fs.readFile("./index.html", null, function (error, data) {
     res.end(data);
@@ -260,16 +274,12 @@ app.get(`/${outputFolder}/*`, (req, res) => {
               url: image,
               responseType: "stream",
             }).then((resImage) => {
-              try {
-                const writer = fs.createWriteStream(filePath);
-                resImage.data.pipe(writer);
-              } catch (error) {}
-              res.writeHead(200, { "Content-Type": "image/png" });
-              resImage.data.pipe(res);
+              writeImage(res, resImage, filePath);
             });
           });
         })
         .catch((error) => {
+          // Retry
           if (statusCode(error) === 403 || statusCode(error) === 429) {
             axios({
               method: "get",
@@ -277,14 +287,7 @@ app.get(`/${outputFolder}/*`, (req, res) => {
               responseType: "stream",
             })
               .then((resRetryImage) => {
-                let data = "";
-                resRetryImage.data.on("data", (/** @type {string} */ chunk) => {
-                  data += chunk;
-                });
-                resRetryImage.data.on("end", () => {
-                  res.writeHead(200, { "Content-Type": "image/png" });
-                  resRetryImage.data.pipe(res);
-                });
+                writeImage(res, resRetryImage, filePath);
               })
               .catch((error) => {
                 res.status(statusCode(error)).end(error.message);
