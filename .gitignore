@@ -1,9 +1,8 @@
-index-private.js
-
 /node_modules
+
 npm-debug.log
-.DS_Store
 /*.env
 
-functions
-/images
+/image/*.png
+
+index-private.js
