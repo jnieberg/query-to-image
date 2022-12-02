@@ -1,8 +1,7 @@
-import { urlToQuery } from "./helpers/helpers.js";
+import { outputFolder, urlToQuery } from "./helpers/helpers.js";
+import { readImageData } from "./helpers/png.js";
 
 export const imageList = (/** @type {string[]} */ files) => {
-  const outputFolder = "image";
-
   return `<html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -82,10 +81,14 @@ export const imageList = (/** @type {string[]} */ files) => {
       margin-bottom: 0.5em;
     }
     body > div > a > div > dl {
+      font-size: 0.8em;
       display: grid;
       grid-template-columns: 25% 75%;
       gap: 0.5em;
       margin: 0;
+    }
+    body > div > a > div > dl > dt {
+      font-weight: bold;
     }
     body > div > a > div > dl > dd {
       margin: 0;
@@ -101,14 +104,22 @@ export const imageList = (/** @type {string[]} */ files) => {
       ${files
         .filter((file) => file.indexOf(".png") > 0)
         .map((file) => {
-          const { prompt, quality = 20, precision = 10, w = 512, h = 512, seed = 1 } = urlToQuery(file);
-          return `<a href="/${outputFolder}/${file}" target="_new">
-            <img src="/${outputFolder}/${file}" alt="${prompt}" title="${prompt}" />
+          let data = readImageData(file);
+          data = data.prompt ? data : urlToQuery(file);
+          const { model = "stablediffusion2", prompt, exclude = "", quality = 20, precision = 10, w = 512, h = 512, seed = 1, filename } = data;
+          const fileimage = filename || `${outputFolder}/${file}`;
+          return prompt
+            ? `<a href="/${fileimage}" target="_new">
+            <img src="/${fileimage}" alt="${prompt}" title="${prompt}" />
             <div>
               <div>${prompt}</div>
               <dl>
                 <dt>size</dt>
                 <dd>${w}x${h}</dd>
+              </dl>
+              <dl>
+                <dt>model</dt>
+                <dd>${model}</dd>
               </dl>
               <dl>
                 <dt>quality</dt>
@@ -122,8 +133,13 @@ export const imageList = (/** @type {string[]} */ files) => {
                 <dt>seed</dt>
                 <dd>${seed}</dd>
               </dl>
+              <dl>
+                <dt>filename</dt>
+                <dd>${file}</dd>
+              </dl>
             </div>
-          </a>`;
+          </a>`
+            : "";
         })
         .join("")}
     </div>

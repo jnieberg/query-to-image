@@ -1,7 +1,7 @@
 import express from "express";
 import axios from "axios";
 import fs from "fs";
-import { endpoint, imageRequest, outputFolder, statusCode, urlToQuery, writeImage } from "./src/helpers/helpers.js";
+import { apiEndpoint, apiPath, imageRequest, outputFolder, readImage, statusCode, toUuid, urlToQuery, writeImage } from "./src/helpers/helpers.js";
 import { imageList } from "./src/imageList.js";
 
 const app = express();
@@ -25,34 +25,40 @@ app.get(`/${outputFolder}s`, (req, res) => {
 });
 app.get(`/${outputFolder}/*`, (req, res) => {
   const filePath = decodeURIComponent(req.originalUrl.substring(1));
-  const { prompt, quality = 20, precision = 10, w = 512, h = 512, seed = 1 } = urlToQuery(filePath);
+  const { model = "stablediffusion2", prompt, exclude = "", quality = "20", precision = "10", w = 512, h = 512, seed = 1 } = urlToQuery(filePath);
 
   const force = typeof req.query.force === "undefined" || req.query.force === "false" ? false : true;
   const inputs = {
-    prompt: `mdjrny-v4 style ${prompt}`,
-    num_inference_steps: quality,
+    prompt,
+    negative_prompt: exclude,
     width: w,
     height: h,
+    num_inference_steps: quality,
     guidance_scale: precision,
-    seed,
+    scheduler: "K_EULER",
+    seed: Number(seed),
   };
 
-  const fileExists = fs.existsSync(filePath);
+  const fileExists = fs.existsSync(toUuid(filePath));
 
   res.header("Access-Control-Allow-Origin", "*");
   res.header("vary", "Accept-Encoding");
 
   if (prompt) {
+    console.log(apiEndpoint + apiPath[model]);
     console.log(inputs);
+    console.log(toUuid(filePath));
+    console.log();
 
     if (force || !fileExists) {
       axios({
         method: "post",
-        url: endpoint,
+        url: apiEndpoint + apiPath[model],
         responseType: "stream",
         data: {
           inputs: {
             ...inputs,
+            prompt_strength: 0.8,
             num_outputs: 1,
           },
         },
@@ -74,14 +80,18 @@ app.get(`/${outputFolder}/*`, (req, res) => {
               method: "get",
               url: image,
               responseType: "stream",
-            }).then((resImage) => {
-              writeImage(res, resImage, filePath);
-            });
+            })
+              .then((resImage) => {
+                writeImage(res, resImage, filePath);
+              })
+              .catch((error) => {
+                res.status(statusCode(error)).end(error.message);
+              });
           });
         })
         .catch((error) => {
           // Retry
-          if (statusCode(error) === 403 || statusCode(error) === 429) {
+          if (statusCode(error) === 403 || statusCode(error) === 429 || statusCode(error) === 503) {
             axios({
               method: "get",
               url: `https://url-to-image.herokuapp.com${req.originalUrl}`,
@@ -98,16 +108,11 @@ app.get(`/${outputFolder}/*`, (req, res) => {
           }
         });
     } else {
-      try {
-        const data = fs.readFileSync(filePath);
-        res.writeHead(200, { "Content-Type": "image/png" });
-        res.end(data);
-      } catch (error) {
-        // res.status(400).end("Error");
-      }
+      readImage(res, filePath);
     }
   } else {
-    res.status(404).end("404 - Image not found");
+    res.writeHead(404, { "Content-Type": "image/png" });
+    res.end("404 - Image not found");
   }
 });
 

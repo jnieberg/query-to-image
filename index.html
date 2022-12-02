@@ -27,16 +27,29 @@
       }
       .page article {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 5em auto 5em auto;
+        align-items: center;
         gap: 1em;
         padding: 1em;
       }
       .page article > * {
-        grid-column-end: span 2;
+        grid-column: span 3;
         margin: 0;
       }
+      .page article > label {
+        grid-column: span 1;
+        margin: 0;
+      }
+      .page article > div {
+        display: grid;
+        grid-template-columns: auto min-content;
+        gap: 0.5em;
+      }
       .page article > .half {
-        grid-column-end: span 1;
+        grid-column: span 1;
+      }
+      .page article > .full {
+        grid-column: span 4;
       }
       .page > *::after {
         position: absolute;
@@ -55,8 +68,8 @@
       }
 
       @media screen and (max-width: 768px) {
-        .page article > .half {
-          grid-column-end: span 2;
+        .page article > .half:not(label) {
+          grid-column: span 3;
         }
       }
 
@@ -104,6 +117,7 @@
       }
 
       button.primary {
+        font-size: 1.25em;
         position: relative;
         background-color: #008844;
       }
@@ -123,6 +137,9 @@
       .table > .th {
         font-weight: bold;
       }
+      hr {
+        border: solid 1px #dddddd;
+      }
     </style>
   </head>
   <body>
@@ -131,34 +148,42 @@
     <form id="form" method="get">
       <div class="page">
         <article>
-          <fieldset>
-            <label for="prompt">Prompt:</label>
-            <input type="text" name="prompt" id="prompt" required />
-          </fieldset>
-          <fieldset class="half">
-            <label for="w">Width:</label>
-            <input type="number" name="w" id="w" placeholder="512" min="128" max="1024" />
-          </fieldset>
-          <fieldset class="half">
-            <label for="h">Height:</label>
-            <input type="number" name="h" id="h" placeholder="512" min="128" max="1024" />
-          </fieldset>
-          <fieldset class="half">
-            <label for="quality">Quality:</label>
-            <input type="number" name="quality" id="quality" placeholder="20" min="1" max="500" />
-          </fieldset>
-          <fieldset class="half">
-            <label for="precision">Precision:</label>
-            <input type="number" name="precision" id="precision" placeholder="10" min="1" max="20" />
-          </fieldset>
-          <fieldset>
-            <label for="seed">Seed:</label>
+          <label for="model">Model:</label>
+          <input type="text" name="model" list="model" placeholder="stablediffusion2" />
+          <datalist id="model">
+            <option value="openjourney">Add prefix 'mdjrny-v4 style' to prompt. Stable Diffusion fine tuned on Midjourney v4 images</option>
+            <option value="stablediffusion">
+              A latent text-to-image diffusion model capable of generating photo-realistic images given any text input
+            </option>
+            <option value="stablediffusion2" selected>sd-v2 with diffusers, test version!</option>
+            <option value="material">Stable diffusion fork for generating tileable outputs</option>
+          </datalist>
+
+          <label for="prompt">Prompt:</label>
+          <input type="text" name="prompt" id="prompt" required />
+
+          <label for="exclude">Exclude:</label>
+          <input type="text" name="exclude" id="exclude" />
+
+          <hr class="full" />
+
+          <label for="w" class="half">Width:</label>
+          <input type="number" name="w" id="w" placeholder="512" min="128" max="1024" class="half" />
+          <label for="h" class="half">Height:</label>
+          <input type="number" name="h" id="h" placeholder="512" min="128" max="1024" class="half" />
+
+          <label for="quality">Quality:</label>
+          <input type="number" name="quality" id="quality" placeholder="20" min="1" max="500" />
+          <label for="precision">Precision:</label>
+          <input type="number" name="precision" id="precision" placeholder="10" min="1" max="20" />
+
+          <label for="seed">Seed:</label>
+          <div>
             <input type="number" name="seed" id="seed" placeholder="1" min="1" max="999999" />
             <button id="randomizeSeed">Random</button>
-          </fieldset>
-          <div>
-            <button class="primary">Generate image</button>
           </div>
+
+          <button class="primary full">Generate image</button>
         </article>
       </div>
     </form>
@@ -221,7 +246,10 @@
         event.preventDefault();
         const inputs = [...event.target.querySelectorAll("input")];
         const filename = inputs
-          .filter(({ value }) => value !== "")
+          .filter(({ value, placeholder }) => {
+            console.log(placeholder);
+            return value !== "" && `${value}` !== placeholder;
+          })
           .map(({ name, value }) => `${name}_${`${value}`.replace(/[^\w;,.?!&-\s]/g, " ")}`)
           .join("+");
         window.location.href = `/image/${filename}.png`;
